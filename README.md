@@ -1,4 +1,4 @@
-# two-perspective-edcl-validation
+# Two Perspectives - EDCL Validation
 
 This repository is the **reproducibility and validation harness** for the manuscript:
 
