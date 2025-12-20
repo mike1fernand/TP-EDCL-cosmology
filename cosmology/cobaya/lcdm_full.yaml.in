@@ -1,0 +1,31 @@
+# lcdm_full.yaml.in
+# Baseline ΛCDM run under the same likelihood configuration as the EDCL run.
+# IMPORTANT: this baseline must NOT include EDCL extra parameters.
+
+likelihood:
+  planck_2018_highl_plik.TTTEEE: null
+  planck_2018_lowl.TT: null
+  planck_2018_lowl.EE: null
+  planck_2018_lensing.clik: null
+  desi_dr2.bao: null
+  desi_dr2.full_shape: null
+  pantheonplus.PantheonPlus: null
+  sh0es.SH0ES: null
+
+theory:
+  classy:
+    path: __CLASS_PATH__
+    extra_args:
+      edcl_on: False
+
+output: __OUTPUT_DIR__
+
+sampler:
+  mcmc:
+    Rminus1_stop: 0.01
+    Rminus1_cl_stop: 0.02
+    covmat: auto
+    drag: True
+    oversample_power: 0.4
+    proposal_scale: 2.0
+    seed: 42
