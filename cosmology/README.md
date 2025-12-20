@@ -1,87 +1,152 @@
-# Cosmology reproduction harness (Tier‑A scaffolding)
+# Cosmology (Tier‑A0 preflight and Tier‑A1 scaffolding)
 
-This folder is designed for a PRD‑referee‑grade, **no‑assumptions** reproduction workflow of the paper’s
-TP/EDCL cosmology claims.
+This folder contains the cosmology-facing components of the **two-perspective-edcl-validation** repository.
 
-It is intentionally split into:
+- **Tier‑A0 (CLASS preflight):** background-only verification of the Phase‑1 \(H(z)\) ratio in **patched CLASS** (no likelihoods; no Cobaya chains).  
+  This is the *paper-facing* cosmology evidence.
+- **Tier‑A1 (Cobaya likelihood reproduction):** scaffolding only (templates + helper scripts). Full Tier‑A1 results will be released later with pinned environments and archived chain directories.
 
-- **Track‑0 (math layer)**: kernel‑only plots under `track0/` (runs anywhere; no external data).
-- **Tier‑B (formalism sanity checks)**: lattice demos under `tierB/` (already runnable locally).
-- **Tier‑A (cosmology fits)**: requires **patched CLASS (tested against upstream tag v3.3.4)** + **Cobaya v3.6** + external likelihood datasets.
+If you are arriving from the paper, the minimum run you should do is **Tier‑A0**.
 
-This repo **does not download** Planck/DESI/PantheonPlus/SH0ES data automatically. A referee will not accept guessed paths
-or guessed likelihood names; you must install and verify components on the target machine (or Colab) first.
+---
 
-## What you need to supply / verify (no assumptions)
+## Tier‑A0: what it checks (referee gate)
 
-1. **CLASS source and version**
-   - The manuscript text references **CLASS v3.4**; upstream `class_public` currently provides tags through **v3.3.4**.
-   - The provided `class_edcl.patch` applies cleanly to **v3.3.4** (apply with `patch -p1`).
-   - Clone that version and build `classy` (python wrapper).
+Tier‑A0 is designed to answer a PRD referee’s basic questions *before* any likelihood claims:
 
-2. **The EDCL patch**
-   - The reproduction pack ships a concrete `class_edcl.patch` at: `cosmology/patches/class_edcl.patch`.
-   - It implements the TP/EDCL background-only Hubble rescaling used by Track‑0 and the paper’s H(z) ratio plots.
+1) Does patched CLASS **build** cleanly?
+2) Does the parser accept the EDCL parameters (no “unknown parameter” failures)?
+3) Does the **ΛCDM limit** hold (EDCL enabled but \(\alpha_R=0\) → exact ΛCDM background)?
+4) Does the **high‑z safety** property hold for the Phase‑1 mapping?
+5) Does the CLASS-produced \(H(z)\) ratio agree with the **Track‑0** kernel-only mapping (same kernel choice)?
 
-3. **Cobaya + installed likelihoods**
-   - The manuscript uses Cobaya **v3.6** and the following likelihood keys:
-     - `planck_2018_highl_plik.TTTEEE`
-     - `planck_2018_lowl.TT`
-     - `planck_2018_lowl.EE`
-     - `planck_2018_lensing.clik`
-     - `desi_dr2.bao`
-     - `desi_dr2.full_shape`
-     - `pantheonplus.PantheonPlus`
-     - `sh0es.SH0ES`
+Tier‑A0 produces both the CLASS \(H(z)\) ratio and the Track‑0 cross-check report/figure.
 
-   Run component discovery first:
-   ```bash
-   python cosmology/scripts/discover_cobaya_components.py
-   ```
-   and confirm these keys exist in your installation (or adjust by installing the correct components).
+---
 
-4. **PantheonPlus “no embedded SH0ES”**
-   - The manuscript states PantheonPlus is used *without* embedded SH0ES calibration when SH0ES is included separately.
-   - This is a data‑provenance issue, not just a YAML issue. Document the exact PantheonPlus variant you installed in
-     `cosmology/data_provenance/pantheonplus_note.md`.
+## What you need installed for Tier‑A0
 
-## Minimal local smoke tests (before any MCMC)
+You need:
 
-1) Verify patched CLASS accepts EDCL parameters:
-```bash
-python cosmology/scripts/smoke_test_classy_edcl.py --class-path /path/to/class
-```
+- A local checkout of **CLASS** (not included in this repo)
+- The CLASS Python wrapper **`classy`** built and importable
+- This repo’s dependencies (`requirements.txt` at repo root)
 
-2) Plot H(z) ratio directly from CLASS (background only):
-```bash
-python cosmology/scripts/make_fig_hubble_ratio_from_class.py --class-path /path/to/class --alpha_R 0.118 --log10_l0 -20.91
-```
+This repo provides:
+- The patch file `class_edcl.patch` at repo root
+- Tier‑A0 scripts in `cosmology/scripts/`
 
-These smoke tests do not require any external likelihood data.
+---
 
-## Rendering YAMLs without guessing paths
+## Step-by-step: running Tier‑A0 (background-only)
 
-Templates live in `cosmology/cobaya/*.yaml.in`. Render them as:
+### Step 1 — Get CLASS
+
+Download CLASS separately and decide which version/commit you will use (the paper/release notes should pin this).
+
+You will end up with a folder such as:
+- `/path/to/class_public/`
+
+### Step 2 — Apply the patch
+
+From your CLASS folder:
 
 ```bash
-python cosmology/scripts/render_yamls.py --class-path /path/to/class --out-root chains
+cd /path/to/class_public
+patch -p1 < /path/to/two-perspective-edcl-validation/class_edcl.patch
 ```
 
-This writes `.yaml` files next to the templates, with concrete `path:` and `output:` fields.
+Optional: validate that the patch file is the expected one:
 
-## Running chains (once Cobaya + likelihood data are installed)
-
-Example:
 ```bash
-cobaya-run cosmology/cobaya/lcdm_full.yaml
-cobaya-run cosmology/cobaya/edcl_cosmo_full.yaml
-cobaya-run cosmology/cobaya/edcl_cosmo_no_sh0es.yaml
+python /path/to/two-perspective-edcl-validation/cosmology/scripts/validate_patch.py \
+  /path/to/two-perspective-edcl-validation/class_edcl.patch
 ```
 
-For Colab, use the notebook in `colab/EDCL_TierA_Cobaya_CLASS.ipynb`.
+### Step 3 — Build CLASS and `classy`
 
-## Referee acceptance tests (Tier‑A)
+A common build sequence (your CLASS setup may differ):
 
-The Tier‑A tests in this repo are designed to be run **after** you have chain outputs and/or background tables.
-They are not executed by default in CI because they require external datasets.
+```bash
+cd /path/to/class_public
+make
+cd python
+python setup.py build_ext --inplace
+```
 
+Sanity check:
+
+```bash
+python -c "import sys; sys.path.insert(0,'/path/to/class_public/python'); from classy import Class; print('classy import: OK')"
+```
+
+### Step 4 — Run the smoke test (checks EDCL params are accepted)
+
+From this repo root:
+
+```bash
+python cosmology/scripts/smoke_test_classy_edcl.py --class-path /path/to/class_public
+```
+
+If this fails with “unknown parameter,” your patch may not have been applied to the CLASS tree you built.
+
+### Step 5 — Run the Tier‑A0 preflight (generates paper-facing artifacts)
+
+From this repo root:
+
+```bash
+python cosmology/scripts/preflight_tiera_background.py \
+  --class-path /path/to/class_public \
+  --alpha_R 0.11824 \
+  --log10_l0 -20.908 \
+  --kappa_tick 0.0833333333333 \
+  --c4 0.06 \
+  --zeta 0.5 \
+  --ai 1e-4 \
+  --kernel exp
+```
+
+Outputs are written to:
+
+- `cosmology/paper_artifacts/`
+
+Expected output files include:
+- `hubble_ratio_from_class.csv`
+- `fig_hubble_ratio_from_class.png`
+- `preflight_report.txt`
+- `preflight_summary.json`
+- `fig_track0_vs_class.png`
+- `track0_vs_class_report.txt`
+
+---
+
+## Tier‑A1 (Cobaya) scaffolding
+
+This repo includes helper materials for later Tier‑A1 runs:
+
+- YAML templates (examples) and helper scripts to avoid guessing component names/paths.
+- A “no assumptions” component discovery script (to confirm installed likelihood keys).
+- A “double counting guardrail” script (PantheonPlus vs SH0ES separation).
+
+Tier‑A1 requires:
+- Cobaya installation
+- Likelihood datasets (Planck/DESI/PantheonPlus/SH0ES), which this repo does not download automatically
+- A pinned environment and archived chains (to be provided with the Tier‑A1 release)
+
+---
+
+## Troubleshooting (Tier‑A0)
+
+### `ModuleNotFoundError: classy`
+You did not build the CLASS Python wrapper, or you are pointing at the wrong CLASS folder.
+
+Re-run the `classy` build and confirm:
+```bash
+python -c "import sys; sys.path.insert(0,'/path/to/class_public/python'); from classy import Class; print('OK')"
+```
+
+### “Unknown parameter: edcl_on” (or similar)
+The patch is not applied to the CLASS tree you built (or you rebuilt without patch). Re-apply patch and rebuild.
+
+### Outputs not found
+Tier‑A0 writes to `cosmology/paper_artifacts/` unless you set an alternate output directory.
