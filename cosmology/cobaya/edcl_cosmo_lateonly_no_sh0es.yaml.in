@@ -1,0 +1,50 @@
+# edcl_cosmo_lateonly_no_sh0es.yaml.in
+#
+# Late-time-only EDCL run WITHOUT an explicit H0 likelihood.
+#
+# Motivation:
+#   This is the cleanest, referee-grade acceptance test for the "no-SH0ES collapse" behavior:
+#   if EDCL is only helping to fit an H0 tension driver, removing the explicit H0 data should
+#   cause alpha_R to collapse toward 0 (or become statistically indistinguishable from 0).
+#
+# NOTE:
+#   This file is intentionally *late-time only* (BAO + SN). It avoids Planck/clik friction.
+
+likelihood:
+  bao.desi_dr2.desi_bao_all: null
+  sn.pantheonplus: null
+
+theory:
+  classy:
+    path: __CLASS_PATH__
+    extra_args:
+      edcl_on: 'yes'
+      kappa_tick: 0.08333333333333333  # 1/12
+      c4: 0.06
+      log10_l0: -20.908
+      edcl_kernel: exp
+      edcl_zeta: 0.5
+      # IMPORTANT: YAML 1.1 (PyYAML) parses "1e-4" as a STRING; use an explicit decimal.
+      edcl_ai: 0.0001
+
+params:
+  H0:
+    prior: {min: 55.0, max: 85.0}
+    ref: 70.0
+    proposal: 0.5
+
+  omega_b: 0.02237
+  omega_cdm: 0.12
+
+  alpha_R:
+    prior: {min: 0.0, max: 0.2}
+    ref: 0.02
+    proposal: 0.01
+
+output: __OUTPUT_DIR__
+
+sampler:
+  mcmc:
+    Rminus1_stop: 0.05
+    covmat: auto
+    seed: 42

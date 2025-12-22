@@ -1,0 +1,91 @@
+# edcl_no_h0.yaml.template
+#
+# EDCL COLLAPSE TEST - No H0 prior
+# Tests that alpha_R -> 0 when H0 tension is removed
+#
+# Likelihoods: DESI BAO + PantheonPlus (NO H0)
+#
+# USAGE: Run render_yaml.py to generate runnable YAML from this template
+
+likelihood:
+  bao.desi_dr2.desi_bao_all: null
+  sn.pantheonplus: null
+  # NO H0 likelihood - testing collapse behavior
+
+theory:
+  classy:
+    path: __CLASS_PATH__
+    extra_args:
+      edcl_on: 'yes'
+      kappa_tick: 0.08333333333333333
+      c4: 0.06
+      log10_l0: -20.908
+      edcl_kernel: exp
+      edcl_zeta: 0.5
+      edcl_ai: 0.0001
+
+params:
+  # Baryon density - Planck prior
+  omega_b:
+    prior:
+      min: 0.018
+      max: 0.026
+    ref:
+      dist: norm
+      loc: 0.02237
+      scale: 0.00015
+    proposal: 0.0001
+    latex: \omega_b
+
+  # Cold dark matter density - Planck prior
+  omega_cdm:
+    prior:
+      min: 0.08
+      max: 0.16
+    ref:
+      dist: norm
+      loc: 0.1200
+      scale: 0.0012
+    proposal: 0.001
+    latex: \omega_{cdm}
+
+  # Hubble parameter (theory frame)
+  H0:
+    prior:
+      min: 60.0
+      max: 80.0
+    ref: 67.5
+    proposal: 0.5
+    latex: H_0^{\rm theory}
+
+  # EDCL amplitude - should collapse to ~0 without H0 tension
+  alpha_R:
+    prior:
+      min: 0.0
+      max: 0.25
+    ref: 0.05
+    proposal: 0.015
+    latex: \alpha_R
+
+  # Derived parameters
+  H0_obs:
+    derived: 'lambda H0, alpha_R: H0 * (1.0 + alpha_R * 0.7542)'
+    latex: H_0^{\rm obs}
+
+  delta0:
+    derived: 'lambda alpha_R: alpha_R * 0.7542'
+    latex: \delta_0
+
+output: __OUTPUT_PATH__/edcl_no_h0
+
+sampler:
+  mcmc:
+    max_samples: 30000
+    Rminus1_stop: 0.02
+    Rminus1_cl_stop: 0.2
+    learn_proposal: true
+    learn_proposal_Rminus1_max: 30
+    measure_speeds: true
+    oversample_power: 0.4
+    drag: true
+    seed: 42

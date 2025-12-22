@@ -1,0 +1,40 @@
+# lcdm_lateonly.yaml.in
+# Late-time-only dataset combination (fast smoke test): DESI BAO + PantheonPlus + Riess2020 H0.
+#
+# Keys match Cobaya 3.6 suggestions observed in your runtime:
+#   - bao.desi_dr2.desi_bao_all
+#   - sn.pantheonplus
+#   - H0.riess2020
+#
+# CRITICAL:
+#   For ΛCDM, DO NOT pass EDCL-only CLASS inputs (kappa_tick, c4, alpha_R, log10_l0, etc.).
+
+likelihood:
+  bao.desi_dr2.desi_bao_all: null
+  sn.pantheonplus: null
+  H0.riess2020: null
+
+theory:
+  classy:
+    path: __CLASS_PATH__
+    extra_args:
+      edcl_on: 'no'
+
+params:
+  # Minimal late-only parameterization (stable and fast):
+  H0:
+    prior: {min: 55.0, max: 85.0}
+    ref: 70.0
+    proposal: 0.5
+
+  # Fixed densities for late-only smoke tests (widen later if desired).
+  omega_b: 0.02237
+  omega_cdm: 0.12
+
+output: __OUTPUT_DIR__
+
+sampler:
+  mcmc:
+    Rminus1_stop: 0.05
+    covmat: auto
+    seed: 42

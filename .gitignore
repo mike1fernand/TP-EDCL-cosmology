@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs/temp
+*.log
+*.tmp
+
+# Large outputs (keep paper_artifacts intentionally; add Tier-A1 chains later via Releases)
+chains/
+outputs/
+
+# Tier-A runtime outputs (do not commit; publish as Release assets)
+edcl_tiera1_*/
+cobaya_packages*/
+class_public*/
+
+# Local/temporary
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+__pycache__/
+*.pyc

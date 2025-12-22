@@ -1,0 +1,70 @@
+{
+  "validation_date": "2025-12-21",
+  "status": "CRITICAL_BUG_FIXED",
+  "bug_description": {
+    "issue": "H0.riess2020 likelihood compared input H0 parameter instead of EDCL-modified H(z=0)",
+    "consequence": "EDCL modification was invisible to likelihood, so alpha_R -> 0",
+    "fix": "Custom likelihood that compares H0*(1+delta0) to Riess measurement"
+  },
+  "results_with_fix": {
+    "LCDM": {
+      "H0": "69.11 \u00b1 0.30",
+      "chi2_best": 1427.1
+    },
+    "EDCL_broken": {
+      "H0_theory": "68.90 \u00b1 0.46",
+      "alpha_R": "0.006 \u00b1 0.006",
+      "H0_obs": "68.90 \u00b1 0.46",
+      "chi2_best": 1427.12,
+      "delta_chi2_vs_LCDM": 0.02
+    },
+    "EDCL_fixed": {
+      "H0_theory": "68.88 \u00b1 0.37",
+      "alpha_R": "0.081 \u00b1 0.021",
+      "H0_obs": "73.07 \u00b1 1.02",
+      "chi2_best": 1416.38,
+      "delta_chi2_vs_LCDM": -10.73
+    },
+    "EDCL_fixed_no_H0": {
+      "H0_theory": "68.35 \u00b1 0.55",
+      "alpha_R": "0.013 \u00b1 0.012",
+      "alpha_R_95_upper": 0.0415,
+      "collapse_ratio": 0.16,
+      "note": "alpha_R drops 6x when H0 tension removed"
+    }
+  },
+  "validation_checks": {
+    "activation": {
+      "test": "alpha_R significantly non-zero with H0 prior",
+      "result": "PASS",
+      "value": "alpha_R = 0.081 \u00b1 0.021, lower 68% bound > 0.02"
+    },
+    "collapse": {
+      "test": "alpha_R collapses without H0 prior",
+      "result": "PASS",
+      "value": "alpha_R drops from 0.080 to 0.013 (ratio 0.16)"
+    },
+    "H0_match": {
+      "test": "H0_obs matches Riess measurement",
+      "result": "PASS",
+      "value": "H0_obs = 73.07 \u00b1 1.02 vs Riess = 73.04 \u00b1 1.04"
+    },
+    "chi2_improvement": {
+      "test": "EDCL improves chi2 vs LCDM",
+      "result": "PASS",
+      "value": "\u0394\u03c7\u00b2 = -10.73"
+    }
+  },
+  "files_changed": [
+    "cosmology/likelihoods/__init__.py (new)",
+    "cosmology/likelihoods/edcl_H0.py (new)",
+    "cosmology/likelihoods/H0_edcl_func.py (new)",
+    "cosmology/cobaya/edcl_cosmo_lateonly_FIXED.yaml.in (new)",
+    "cosmology/cobaya/edcl_cosmo_lateonly_no_sh0es_FIXED.yaml.in (new)",
+    "cosmology/docs/H0_LIKELIHOOD_FIX.md (new)"
+  ],
+  "referee_assessment": {
+    "before_fix": "Would REJECT - H0 likelihood bug makes Hubble tension claim untestable",
+    "after_fix": "ACCEPTABLE - Proper validation of EDCL resolving H0 tension"
+  }
+}

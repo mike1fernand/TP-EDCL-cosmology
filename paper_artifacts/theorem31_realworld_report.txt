@@ -1,0 +1,190 @@
+================================================================================
+TP/EDCL Tier-B: Real-World Theorem 3.1 / Thm. localc-1D Validation
+================================================================================
+
+PROFILE (paper minimal recipe):
+  n_i = n0(1 + ε_n * i/L)
+  J_i = J0 * exp(-α_J * n_i)
+
+CALIBRATIONS:
+  Matched: F = α_F * J(n)
+  Mismatched: F = n^q for q in (1.0, 0.5)
+
+PARAMETERS:
+  L0=1600, scales=(1, 2, 3)
+  n0=1.0, ε_n=0.3, J0=1.0, α_J=0.15
+  α_F=1.0
+  k0_base=0.08, σ_base=80.0, Δτ=0.05
+  n_x0=5, boundary_pad=8.0σ
+
+--------------------------------------------------------------------------------
+ISSUE 3: COMPLETE PARAMETER TABLE (per run level)
+--------------------------------------------------------------------------------
+
+  ┌─────────┬────────┬────────┬────────┬──────────┬────────────┐
+  │  scale  │   L    │   σ    │   k0   │   τ_max  │   Region R │
+  ├─────────┼────────┼────────┼────────┼──────────┼────────────┤
+  │     1   │   1600 │   80.0 │ 0.0800 │    300.0 │ [480,1040]   │
+  │     2   │   3200 │  113.1 │ 0.0566 │    424.3 │ [960,2080]   │
+  │     3   │   4800 │  138.6 │ 0.0462 │    519.6 │ [1440,3120]   │
+  └─────────┴────────┴────────┴────────┴──────────┴────────────┘
+
+  Derived error parameters:
+  ┌─────────┬──────────┬──────────┬──────────┬──────────┐
+  │  scale  │   ε_ad   │  ε_disp  │ (k0*a)²  │   Δk     │
+  ├─────────┼──────────┼──────────┼──────────┼──────────┤
+  │     1   │  0.00225 │  0.00640 │  0.00640 │  0.00625 │
+  │     2   │  0.00159 │  0.00320 │  0.00320 │  0.00442 │
+  │     3   │  0.00130 │  0.00213 │  0.00213 │  0.00361 │
+  └─────────┴──────────┴──────────┴──────────┴──────────┘
+
+--------------------------------------------------------------------------------
+ISSUE D + ISSUE 2: FORMAL DEFINITION OF MISMATCH PREDICTOR
+--------------------------------------------------------------------------------
+
+  Define q(x) ≡ J(x) / F(x)
+
+  For matched calibration F = α_F J:
+    q(x) = 1/α_F = const  →  Std[q] = 0
+
+  For mismatched calibration F ≠ const × J:
+    q(x) varies  →  predicted plateau:
+
+    A_pred ≡ Std_{x∈R_eff}[q] / Mean_{x∈R_eff}[q]
+
+  CRITICAL (Issue 2): R_eff is the set of EFFECTIVE positions,
+  i.e., the mean ⟨x⟩ during each run's fit window, NOT the initial x0.
+  This ensures A_pred is evaluated on the same support as ε_space.
+
+  Issue 1: Predictor uses exact TB group velocity 2sin(k0*a), not 2k0.
+
+  Theorem prediction: ε_v^MM → A_pred as ε_ad + ε_disp → 0
+
+--------------------------------------------------------------------------------
+CONVERGENCE SUMMARY
+--------------------------------------------------------------------------------
+scale      L      σ     k0     ε_ad   ε_disp    ε_tot    ε_sp(M)   ε_sp(MM)     A_pred
+    1   1600   80.0  0.080   0.0023  0.00640   0.0087  3.036e-04  2.120e-02  2.150e-02
+    2   3200  113.1  0.057   0.0016  0.00320   0.0048  5.348e-04  3.749e-02  3.802e-02
+    3   4800  138.6  0.046   0.0013  0.00213   0.0034  5.353e-04  3.751e-02  3.805e-02
+
+--------------------------------------------------------------------------------
+SUGGESTION 1 + ISSUE B: MOMENTUM STABILITY AND VELOCITY BASELINE
+--------------------------------------------------------------------------------
+
+  Theorem uses narrow-band approximation: v_coord ≈ 2aJk0
+  Exact tight-binding dispersion gives:   v_coord = 2aJ sin(k a)
+
+  SUGGESTION 1: Use MEASURED k_mean (not initial k0) in predictor.
+  This addresses systematic offset between v_exact(k0) and v_measured.
+
+  Scale 1:
+    Initial k₀ = 0.08000
+    Measured k_mean = 0.07292 (Δk/k₀ = -8.85%)
+    k stability (std/mean) = 2.816e-02
+    v_exact(k₀) = 2sin(k₀)/α = 0.15983
+    v_exact(k_mean) = 2sin(k_mean)/α = 0.14572
+    Measured v_obs = 0.14580
+    Offset from k₀: -8.78%
+    Offset from k_mean: 0.06%
+  Scale 2:
+    Initial k₀ = 0.05657
+    Measured k_mean = 0.05155 (Δk/k₀ = -8.87%)
+    k stability (std/mean) = 2.835e-02
+    v_exact(k₀) = 2sin(k₀)/α = 0.11308
+    v_exact(k_mean) = 2sin(k_mean)/α = 0.10306
+    Measured v_obs = 0.10312
+    Offset from k₀: -8.81%
+    Offset from k_mean: 0.06%
+  Scale 3:
+    Initial k₀ = 0.04619
+    Measured k_mean = 0.04209 (Δk/k₀ = -8.88%)
+    k stability (std/mean) = 2.836e-02
+    v_exact(k₀) = 2sin(k₀)/α = 0.09234
+    v_exact(k_mean) = 2sin(k_mean)/α = 0.08415
+    Measured v_obs = 0.08420
+    Offset from k₀: -8.82%
+    Offset from k_mean: 0.06%
+
+--------------------------------------------------------------------------------
+SUGGESTION 3: TEMPORAL CONSTANCY PER RUN
+--------------------------------------------------------------------------------
+
+  Purpose: Verify each run's velocity is stable in TIME (not just space).
+  Metric: std_t(v_obs)/mean_t(v_obs) within fit window
+  Tolerance: < 0.1
+
+  Scale 1: temporal constancy = 2.797e-02 [PASS]
+  Scale 2: temporal constancy = 2.808e-02 [PASS]
+  Scale 3: temporal constancy = 2.810e-02 [PASS]
+
+--------------------------------------------------------------------------------
+ISSUE A: Δτ REFINEMENT STUDY (INTEGRATOR CONVERGENCE)
+--------------------------------------------------------------------------------
+
+  Purpose: Verify that ε_v is dominated by physics, not integrator error.
+  Method: Run at Δτ × (1.0, 0.5, 0.25) at fixed (L, σ, k0)
+
+  Base Δτ = 0.05
+    Δτ × 1.0: v_hat = 0.145802
+    Δτ × 0.5: v_hat = 0.145736
+    Δτ × 0.25: v_hat = 0.145720
+  Max relative change under refinement: 4.472e-04
+  Tolerance: 5e-02
+  Status: PASS
+  Scale 1: Δτ convergence error = 4.472e-04
+  Scale 2: Δτ convergence error = 4.591e-04
+  Scale 3: Δτ convergence error = 4.519e-04
+
+--------------------------------------------------------------------------------
+ISSUE C: BOUNDARY IMMUNITY
+--------------------------------------------------------------------------------
+
+  Purpose: Verify no boundary reflection contamination.
+  Metric: min(d_edge / σ) over all runs in measurement window
+  where d_edge is distance from packet center (±3σ) to nearest boundary.
+
+  Requirement: > 4σ
+  Justification: At 4σ, Gaussian probability < 0.01% (e^{-8} ≈ 3×10⁻⁴)
+
+  Scale 1: min(d_edge/σ) = 4.6  [PASS]
+  Scale 2: min(d_edge/σ) = 5.6  [PASS]
+  Scale 3: min(d_edge/σ) = 7.5  [PASS]
+
+--------------------------------------------------------------------------------
+LEMMA 'ONLY-IF' DIAGNOSTIC: max|∂_x ln J - ∂_x ln F|
+--------------------------------------------------------------------------------
+Scale 1:
+  Matched: 0.000e+00
+  Mismatch q=1.0: 2.025e-04
+  Mismatch q=0.5: 1.153e-04
+Scale 2:
+  Matched: 0.000e+00
+  Mismatch q=1.0: 1.027e-04
+  Mismatch q=0.5: 5.836e-05
+Scale 3:
+  Matched: 0.000e+00
+  Mismatch q=1.0: 6.812e-05
+  Mismatch q=0.5: 3.875e-05
+
+--------------------------------------------------------------------------------
+ACCEPTANCE CRITERIA
+--------------------------------------------------------------------------------
+  [PASS] Norm conservation: max=1.02e-13, tol=1e-10
+  [PASS] Locality gate: max=1.238e-03, gate=0.1
+  [PASS] Matched spatial variability → 0: ε_space=5.353e-04, tol=2e-02
+  [PASS] Mismatch/Matched ratio > threshold: ratio=70.1, tol=3.0
+  [PASS] Issue D: Mismatch consistent with A_pred: ε_space=3.751e-02, A_pred=3.805e-02
+  [PASS] Worldline approximation: rel=8.436e-07, tol=1e-02
+  [PASS] Lemma: matched ≈ 0: residual=0.000e+00
+  [PASS] Lemma: mismatch > 0: residual=6.812e-05
+  [PASS] Issue A: Δτ convergence: error=4.519e-04, tol=5e-02
+  [PASS] Issue B: Small parameter (k0 a)² < 0.01: (k0 a)²=2.1333e-03
+  [PASS] Issue C: Boundary distance > 4σ: min(d/σ)=7.5
+  [PASS] Suggestion 1: Momentum stability: k_stability=2.836e-02, tol=5e-02
+  [PASS] Suggestion 1: v_obs matches k_mean predictor: v_obs=0.08420, v_pred(k_mean)=0.08415
+  [PASS] Suggestion 3: Temporal constancy: temporal=2.810e-02, tol=1e-01
+
+================================================================================
+OVERALL: ALL TESTS PASSED
+================================================================================

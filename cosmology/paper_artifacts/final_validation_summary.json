@@ -1,0 +1,39 @@
+{
+  "validation_date": "2025-12-21",
+  "dataset": "Late-only: DESI BAO + PantheonPlus + Riess H0",
+  "lcdm": {
+    "H0": "71.37 \u00b1 0.72",
+    "omega_b": "0.02511 \u00b1 0.00078",
+    "omega_cdm": "0.1306 \u00b1 0.0052",
+    "chi2_best": 1417.2453,
+    "n_samples": 1620,
+    "eff_samples": 5094.0
+  },
+  "edcl_with_h0": {
+    "H0_theory": "68.80 \u00b1 1.85",
+    "alpha_R": "0.0826 \u00b1 0.0408",
+    "alpha_R_68CI": [
+      0.039695823400000003,
+      0.1254485652
+    ],
+    "H0_obs": "73.04 \u00b1 0.95",
+    "chi2_best": 1416.1826,
+    "n_samples": 1848,
+    "eff_samples": 5232.0
+  },
+  "edcl_without_h0": {
+    "H0_theory": "68.01 \u00b1 1.97",
+    "alpha_R": "0.0147 \u00b1 0.0142",
+    "alpha_R_95upper": 0.049694743549999996,
+    "chi2_best": 1416.2775
+  },
+  "delta_chi2": -1.0626999999999498,
+  "collapse_ratio": 0.17757155036012742,
+  "validation_status": {
+    "activation": "PASS",
+    "collapse": "PASS",
+    "h0_match": "PASS",
+    "chi2_improvement": "PASS"
+  },
+  "note": "\u0394\u03c7\u00b2 is small because late-only data allows \u039bCDM to compromise on H0. Add CMB for full test."
+}

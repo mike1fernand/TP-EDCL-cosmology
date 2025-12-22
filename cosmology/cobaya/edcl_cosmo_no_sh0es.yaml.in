@@ -1,0 +1,84 @@
+# edcl_cosmo_no_sh0es.yaml.in
+#
+# Full (CMB + BAO + SN) EDCL Phase-1 template WITHOUT an explicit H0 likelihood.
+#
+# Use this for the referee-grade "no-SH0ES collapse" check:
+# compare with edcl_cosmo_full.yaml (which includes an explicit H0 likelihood).
+
+likelihood:
+  planck_2018_highl_plik.TTTEEE: null
+  planck_2018_lowl.TT: null
+  planck_2018_lowl.EE: null
+  planck_2018_lensing.clik: null
+  bao.desi_dr2.desi_bao_all: null
+  sn.pantheonplus: null
+
+  # DESI full-shape likelihood keys vary by install; enable only if cobaya-install recognizes it.
+  # desi_dr2.full_shape: null
+
+theory:
+  classy:
+    path: __CLASS_PATH__
+    extra_args:
+      edcl_on: 'yes'
+      kappa_tick: 0.08333333333333333  # 1/12
+      c4: 0.06
+      log10_l0: -20.908
+      edcl_kernel: exp
+      edcl_zeta: 0.5
+      # IMPORTANT: YAML 1.1 (PyYAML) parses "1e-4" as a STRING; use an explicit decimal.
+      edcl_ai: 0.0001
+
+params:
+  omega_b:
+    prior: {min: 0.018, max: 0.026}
+    ref: {dist: norm, loc: 0.0224, scale: 0.0003}
+    proposal: 0.0001
+
+  omega_cdm:
+    prior: {min: 0.09, max: 0.15}
+    ref: {dist: norm, loc: 0.12, scale: 0.005}
+    proposal: 0.002
+
+  H0:
+    prior: {min: 50.0, max: 90.0}
+    ref: {dist: norm, loc: 67.4, scale: 1.0}
+    proposal: 0.5
+
+  tau_reio:
+    prior: {min: 0.01, max: 0.2}
+    ref: {dist: norm, loc: 0.054, scale: 0.007}
+    proposal: 0.003
+
+  A_s:
+    # Use explicit float formats that are safe under YAML 1.1 parsers.
+    prior: {min: 1.0e-10, max: 5.0e-9}
+    ref: 2.1e-9
+    proposal: 1.0e-10
+
+  n_s:
+    prior: {min: 0.8, max: 1.2}
+    ref: {dist: norm, loc: 0.965, scale: 0.004}
+    proposal: 0.002
+
+  A_planck:
+    prior: {min: 0.9, max: 1.1}
+    ref: {dist: norm, loc: 1.0, scale: 0.01}
+    proposal: 0.005
+
+  alpha_R:
+    prior: {min: 0.0, max: 0.25}
+    ref: {dist: norm, loc: 0.05, scale: 0.03}
+    proposal: 0.01
+
+output: __OUTPUT_DIR__
+
+sampler:
+  mcmc:
+    Rminus1_stop: 0.01
+    Rminus1_cl_stop: 0.02
+    covmat: auto
+    drag: true
+    oversample_power: 0.4
+    proposal_scale: 2.0
+    seed: 42

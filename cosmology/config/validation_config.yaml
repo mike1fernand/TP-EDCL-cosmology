@@ -1,0 +1,139 @@
+version: 2
+profiles:
+  iterate:
+    description: 'Iteration/debug profile: warn on short chains; not referee-grade.'
+    policy: warn
+    min_samples: 5000
+    min_effective_samples: 2000
+    min_chains: 1
+  smoke:
+    alias_of: iterate
+    description: Alias of iterate (back-compat).
+  referee:
+    description: 'Referee-grade profile: hard gates on chain size and multi-chain
+      output.'
+    policy: hard
+    min_samples: 20000
+    min_effective_samples: 8000
+    min_chains: 2
+runs:
+  lcdm:
+    yaml: lcdm_lateonly.yaml
+    label: "\u039BCDM late-only (BAO+SN+H0)"
+    track_params: []
+  edcl_h0:
+    yaml: edcl_cosmo_lateonly.yaml
+    label: EDCL late-only (BAO+SN+H0)
+    track_params:
+    - alpha_R
+  edcl_noh0:
+    yaml: edcl_cosmo_lateonly_no_sh0es.yaml
+    label: EDCL late-only (BAO+SN only; no explicit H0)
+    track_params:
+    - alpha_R
+phase1_model_definition:
+  note: 'Phase-1 background-only: only alpha_R is inferred; kernel/zeta/ai/kappa_tick/log10_l0/c4
+    are treated as fixed solver/model-definition choices.'
+  fixed_theory_args:
+    edcl_kernel: exp
+    edcl_zeta: 0.5
+    edcl_ai: 0.0001
+    kappa_tick: 0.08333333333333333
+    log10_l0: -20.908
+    c4: 0.06
+  inferred_params:
+  - alpha_R
+checks:
+  required_paths:
+  - manifest.json
+  - logs
+  - yamls
+  updated_yaml_required: true
+  log_fail_patterns:
+  - Traceback \(most recent call last\)
+  - Segmentation fault
+  - \bFATAL\b
+  - \bAborting\b
+  - Class did not read input parameter
+  - Serious error
+  - 'RuntimeError:'
+  - 'ModuleNotFoundError:'
+  - 'ImportError:'
+  - \bKilled\b
+  yaml_invariants:
+    edcl_only_args:
+    - kappa_tick
+    - c4
+    - log10_l0
+    - edcl_kernel
+    - edcl_zeta
+    - edcl_ai
+    lcdm_edcl_on_expected: 'no'
+    edcl_edcl_on_expected: 'yes'
+  chain_discovery:
+    search_subdirs:
+    - chains
+    file_globs:
+    - '*.txt'
+    - '*.txt.gz'
+    max_chain_files_per_run: 64
+  chain_columns:
+    param: alpha_R
+    weight_names:
+    - weight
+    - weights
+    loglike_names:
+    - loglike
+    - log_like
+    - loglikelihood
+    logpost_names:
+    - logpost
+    - log_posterior
+    chi2_prefix: chi2__
+acceptance:
+  activation:
+    run: edcl_h0
+    param: alpha_R
+    q: 0.5
+    min: 0.03
+    note: "Activation check: median \u03B1R should be pulled away from 0 when explicit\
+      \ H0 likelihood is included (Run A)."
+  collapse:
+    run: edcl_noh0
+    param: alpha_R
+    q: 0.95
+    note: "Collapse check (Phase-1, \u03B1R\u22650): require a 95% upper limit in\
+      \ BAO+SN-only run. Pass: q95(\u03B1R)\u22640.03. Strong pass: q95(\u03B1R)\u2264\
+      0.02."
+    pass_max: 0.03
+    strong_pass_max: 0.02
+  collapse_ratio:
+    numerator_run: edcl_noh0
+    numerator_q: 0.95
+    denominator_run: edcl_h0
+    denominator_q: 0.5
+    max: 0.5
+    note: "Relative-collapse check: q95(noH0)/q50(withH0) \u2264 0.5 (\u22652\xD7\
+      \ shrinkage)."
+diagnostics:
+  chi2_components:
+    H0:
+      patterns:
+      - chi2__H0
+      - chi2__h0
+      - chi2__riess
+      - chi2__sh0es
+      warn_delta_gt: 1.0
+    SN:
+      patterns:
+      - chi2__sn
+      - chi2__pantheon
+      warn_delta_gt: 5.0
+    BAO:
+      patterns:
+      - chi2__bao
+      - chi2__desi
+      warn_delta_gt: 5.0
+  note: "\u0394\u03C7\xB2 checks are diagnostics only (warnings), not Tier-A1 acceptance\
+    \ gates."
+  compare_to_run: lcdm

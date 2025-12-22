@@ -1,0 +1,14 @@
+Track-0 Kernel Consistency Report
+
+Settings: zeta=0.5, a_i=0.0001, f_norm_target=0.7542, delta0=0.089
+Normalization rule: choose global C so that I(a0=1)=f_norm_target.
+
+Variant: paper_equation_1mexp  (Eq. kernel-shape: (1-exp(-z/ζ)))
+  Normalization constant C = 2.71938
+  f_norm (computed) = 0.754200 (target 0.7542)
+  High-z safety (|H_ratio-1|<=0.2%): NOT satisfied on z∈[0,1100] grid
+
+Variant: paper_claim_exp  (Claim-consistent: exp(-z/ζ))
+  Normalization constant C = 3.38727
+  f_norm (computed) = 0.754200 (target 0.7542)
+  High-z safety (|H_ratio-1|<=0.2%): satisfied for z >= 1.62

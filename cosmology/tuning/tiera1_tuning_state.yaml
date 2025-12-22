@@ -1,0 +1,37 @@
+version: 1
+phase: phase1_background_only
+note: Autotuner mutable state for Tier-A1. In Phase-1, only sampler/run-control parameters
+  are mutable by AI. EDCL microparameters remain fixed by model definition.
+mutable:
+  sampler:
+    mcmc:
+      max_samples: 20000
+      Rminus1_stop: 0.05
+      proposal_scale: 2.0
+      seed: 42
+  priors:
+    alpha_R:
+      max: 0.25
+immutable_phase1_edcl:
+  edcl_kernel: exp
+  edcl_zeta: 0.5
+  edcl_ai: 0.0001
+  kappa_tick: 0.08333333333333333
+  log10_l0: -20.908
+  c4: 0.06
+bounds:
+  mutable.sampler.mcmc.max_samples:
+    min: 2000
+    max: 300000
+  mutable.sampler.mcmc.Rminus1_stop:
+    min: 0.005
+    max: 0.2
+  mutable.sampler.mcmc.proposal_scale:
+    min: 0.5
+    max: 5.0
+  mutable.priors.alpha_R.max:
+    min: 0.05
+    max: 1.0
+iteration:
+  n: 0
+  history: []

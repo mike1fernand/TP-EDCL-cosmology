@@ -1,0 +1,40 @@
+TP/EDCL Tier-B: Theorem 3.1 / Thm. localc-1D local-speed validation
+==============================================================================
+Profile (paper minimal recipe): n_i = n0(1+eps i/L), J_i = J0 exp(-alpha_J n_i).
+Evolution: 2nd-order even/odd Trotter.
+Observer time: t_cm(τ)=∫ F[n(<x>)] dτ; also computed t_exp(τ)=∫ <F> dτ.
+
+Parameters:
+  L0=1024, scales=(1, 2)
+  n0=1.0, eps_n=1.0, J0=1.0, alpha_J=0.5
+  alpha_F=1.0 (matched F=alpha_F*J)
+  mismatch: F=n^1.0
+  k0_0=0.2, sigma0=32.0, dtau=0.05, tau_max0=200.0
+  x0 sampling: n_x0=9, frac=[0.25,0.75] (with 6σ boundary clip)
+
+Computed per-level summary
+------------------------------------------------------------------------------
+scale  L     sigma  k0     eps_ad   eps_disp  eps_tot   eps_space(M)  eps_space(MM)  A_pred(MM)  worldline_rel(M)  worldline_rel(MM)
+    1   1024   32.0  0.200   0.0156   0.04000   0.0556    2.4954e-02     1.6169e-01  1.8920e-01       1.2094e-04        3.7408e-14
+    2   2048   45.3  0.141   0.0110   0.02000   0.0310    2.5398e-02     1.6263e-01  1.8942e-01       6.0753e-05        4.4567e-14
+
+Acceptance / referee checks
+------------------------------------------------------------------------------
+Level scale=1:
+  Locality metric (matched)  max=0.000e+00  gate=1.00e-01  => OK
+  Locality metric (mismatch) max=2.551e-02  gate=1.00e-01  => OK
+  Worldline t_cm vs t_exp (matched)  max rel=1.209e-04  (target < 5.0e-03)
+  Worldline t_cm vs t_exp (mismatch) max rel=3.741e-14  (target < 5.0e-03)
+  Matched spatial variability eps_space=2.495e-02 (target < 1.0e-03 at finest)
+  Mismatch spatial variability eps_space=1.617e-01 vs predictor A=1.892e-01
+Level scale=2:
+  Locality metric (matched)  max=0.000e+00  gate=1.00e-01  => OK
+  Locality metric (mismatch) max=1.279e-02  gate=1.00e-01  => OK
+  Worldline t_cm vs t_exp (matched)  max rel=6.075e-05  (target < 5.0e-03)
+  Worldline t_cm vs t_exp (mismatch) max rel=4.457e-14  (target < 5.0e-03)
+  Matched spatial variability eps_space=2.540e-02 (target < 1.0e-03 at finest)
+  Mismatch spatial variability eps_space=1.626e-01 vs predictor A=1.894e-01
+
+Lemma worldline bound coefficient (sup|∇F| σ_max):
+  matched:  9.474728e-03
+  mismatch: 3.125000e-02

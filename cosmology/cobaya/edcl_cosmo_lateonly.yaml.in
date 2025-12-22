@@ -1,0 +1,58 @@
+# edcl_cosmo_lateonly.yaml.in
+#
+# Late-time-only dataset combination (fast smoke test): DESI BAO + PantheonPlus + Riess2020 H0.
+#
+# CRITICAL:
+#   When EDCL is ON, the patched CLASS build reads these extra parameters:
+#     alpha_R, kappa_tick, c4, log10_l0, edcl_kernel, edcl_zeta, edcl_ai
+#
+# Likelihood keys below reflect Cobaya 3.6 suggestions observed in one working environment:
+#   - bao.desi_dr2.desi_bao_all
+#   - sn.pantheonplus
+#   - H0.riess2020
+#
+# If your install differs, do not guess: run cobaya-install on the rendered YAML and follow
+# the "Did you mean ..." suggestions printed by Cobaya.
+
+likelihood:
+  bao.desi_dr2.desi_bao_all: null
+  sn.pantheonplus: null
+  H0.riess2020: null
+
+theory:
+  classy:
+    path: __CLASS_PATH__
+    extra_args:
+      edcl_on: 'yes'
+      kappa_tick: 0.08333333333333333  # 1/12
+      c4: 0.06
+      log10_l0: -20.908
+      edcl_kernel: exp
+      edcl_zeta: 0.5
+      # IMPORTANT: YAML 1.1 (PyYAML) parses "1e-4" as a STRING; use an explicit decimal.
+      edcl_ai: 0.0001
+
+params:
+  # Minimal late-only parameterization (stable and fast):
+  H0:
+    prior: {min: 55.0, max: 85.0}
+    ref: 73.0
+    proposal: 0.5
+
+  # Fixed densities for late-only smoke tests (widen later if desired).
+  omega_b: 0.02237
+  omega_cdm: 0.12
+
+  # EDCL amplitude parameter
+  alpha_R:
+    prior: {min: 0.0, max: 0.2}
+    ref: 0.02
+    proposal: 0.01
+
+output: __OUTPUT_DIR__
+
+sampler:
+  mcmc:
+    Rminus1_stop: 0.05
+    covmat: auto
+    seed: 42
